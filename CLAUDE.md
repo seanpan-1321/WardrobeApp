@@ -35,10 +35,52 @@ There is no test runner configured yet.
 
 ## Architecture
 
-- App Router lives in `src/app`. `src/app/layout.tsx` is the root layout (Geist fonts), `src/app/page.tsx` is the home page — both still the unmodified create-next-app scaffold.
+- App Router lives in `src/app`. `src/app/layout.tsx` is the root layout (Geist fonts, page metadata). `src/app/page.tsx` is the home page — a Client Component (`"use client"`) that holds the live wardrobe list in `useState`, seeded from `mockItems`, and renders `WardrobeGrid` + the `AddClothingForm` toggle.
+- `src/components/ClothingCard.tsx` and `src/components/WardrobeGrid.tsx` render a single item / the item grid respectively; `src/components/AddClothingForm.tsx` is the controlled form (its own `useState` for form fields) that calls an `onAdd` callback prop with a new `ClothingItem` on submit.
+- `src/lib/mock-items.ts` defines the `ClothingItem` type and the hardcoded `mockItems` array used to seed the UI — this is the type/shape that will eventually map to a Supabase table.
 - Supabase access goes through `src/lib/supabase/`:
   - `client.ts` — `createBrowserClient`, for use in Client Components.
   - `server.ts` — `createServerClient`, for use in Server Components/Route Handlers; reads/writes auth cookies via `next/headers`.
   - Always create a fresh client per request/component via these helpers rather than sharing a module-level client instance (this is the pattern `@supabase/ssr` expects for correct cookie handling).
 - Environment variables: copy `.env.example` to `.env.local` and fill in `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from the Supabase project settings. No Supabase project/schema exists yet — tables for clothing items and outfits still need to be designed and created (e.g. via the Supabase SQL editor or migrations) before the upload/list features can be built.
 - No image storage bucket, auth flow, or data model has been built yet — this scaffold only wires up the Supabase client helpers and Tailwind/Next.js base. The next step per the MVP order above is the clothing item upload feature.
+
+## Current Progress (2026-06-21)
+
+Completed:
+- Next.js + Tailwind project setup
+- Git repository initialized
+- GitHub repository connected
+- Supabase helper files created
+- Homepage UI created
+- ClothingCard component created
+- WardrobeGrid component created
+- Mock clothing data created
+- ClothingItem TypeScript type expanded with:
+  - category
+  - clothingType
+  - color
+  - season
+  - style
+  - occasion
+  - material
+  - favorite
+- Add Clothing Item form created (`AddClothingForm.tsx`), using React state only — users can add a clothing item from the UI and see it appear in the wardrobe grid immediately
+
+Current Status:
+- UI is working, including adding new items via the form
+- Data is mock/in-memory state only — new items do not persist across page reloads
+- No database integration yet
+- No image upload yet
+- No authentication yet
+
+Next Planned Milestone:
+- Turn the inline "Add clothing item" form into a popup/modal for better UX
+- Clicking "+ Add clothing item" should open a modal overlay with the form inside, instead of the form appearing inline in the page
+- Still React state only — no Supabase, no AI yet
+
+Learning Goals:
+- Understand React state
+- Understand form handling
+- Understand data flow between components
+- Understand modal/popup UI patterns in React
