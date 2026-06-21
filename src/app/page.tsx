@@ -1,4 +1,5 @@
 import { mockItems } from "@/lib/mock-items";
+import { WardrobeGrid } from "@/components/WardrobeGrid";
 
 export default function Home() {
   return (
@@ -26,36 +27,7 @@ export default function Home() {
             Your wardrobe
           </h2>
 
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-            {mockItems.map((item) => (
-              <div
-                key={item.id}
-                className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
-              >
-                <p className="font-semibold text-zinc-950 dark:text-zinc-50">
-                  {item.name}
-                </p>
-                <dl className="flex flex-col gap-1 text-sm text-zinc-600 dark:text-zinc-400">
-                  <div className="flex justify-between gap-2">
-                    <dt>Category</dt>
-                    <dd>{item.category}</dd>
-                  </div>
-                  <div className="flex justify-between gap-2">
-                    <dt>Color</dt>
-                    <dd>{item.color}</dd>
-                  </div>
-                  <div className="flex justify-between gap-2">
-                    <dt>Season</dt>
-                    <dd>{item.season}</dd>
-                  </div>
-                  <div className="flex justify-between gap-2">
-                    <dt>Style</dt>
-                    <dd>{item.style}</dd>
-                  </div>
-                </dl>
-              </div>
-            ))}
-          </div>
+          <WardrobeGrid items={mockItems} />
         </section>
       </main>
     </div>
