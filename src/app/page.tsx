@@ -5,6 +5,7 @@ import { mockItems } from "@/lib/mock-items";
 import type { ClothingItem } from "@/lib/mock-items";
 import { WardrobeGrid } from "@/components/WardrobeGrid";
 import { AddClothingForm } from "@/components/AddClothingForm";
+import { Modal } from "@/components/Modal";
 
 export default function Home() {
   const [items, setItems] = useState<ClothingItem[]>(mockItems);
@@ -31,13 +32,17 @@ export default function Home() {
         <div className="flex flex-col gap-4">
           <button
             type="button"
-            onClick={() => setShowForm((prev) => !prev)}
+            onClick={() => setShowForm(true)}
             className="flex items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-white px-5 py-4 text-base font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
           >
-            {showForm ? "✕ Cancel" : "+ Add clothing item"}
+            + Add clothing item
           </button>
 
-          {showForm && <AddClothingForm onAdd={handleAdd} />}
+          {showForm && (
+            <Modal onClose={() => setShowForm(false)}>
+              <AddClothingForm onAdd={handleAdd} />
+            </Modal>
+          )}
         </div>
 
         <section className="flex flex-col gap-4">
