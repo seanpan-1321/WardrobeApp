@@ -3,6 +3,18 @@ import type { ClothingItem } from "@/lib/mock-items";
 export function ClothingCard({ item }: { item: ClothingItem }) {
   return (
     <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      {item.photoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={item.photoUrl}
+          alt={item.name}
+          className="h-40 w-full rounded-lg object-cover"
+        />
+      ) : (
+        <div className="flex h-40 w-full items-center justify-center rounded-lg bg-zinc-100 text-sm text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500">
+          No photo
+        </div>
+      )}
       <div className="flex items-center justify-between gap-2">
         <p className="font-semibold text-zinc-950 dark:text-zinc-50">
           {item.name}

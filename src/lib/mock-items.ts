@@ -9,6 +9,7 @@ export type ClothingItem = {
   occasion: string;
   material: string;
   favorite: boolean;
+  photoUrl?: string;
 };
 
 export const mockItems: ClothingItem[] = [

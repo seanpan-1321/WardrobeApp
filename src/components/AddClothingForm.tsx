@@ -33,6 +33,7 @@ export function AddClothingForm({
   onAdd: (item: ClothingItem) => void;
 }) {
   const [formData, setFormData] = useState(emptyFormData);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const { name, value, type, checked } = event.target;
@@ -42,10 +43,17 @@ export function AddClothingForm({
     }));
   }
 
+  function handlePhotoChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(file ? URL.createObjectURL(file) : null);
+  }
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    onAdd({ id: crypto.randomUUID(), ...formData });
+    onAdd({ id: crypto.randomUUID(), ...formData, photoUrl: previewUrl ?? undefined });
     setFormData(emptyFormData);
+    setPreviewUrl(null);
   }
 
   return (
@@ -71,6 +79,25 @@ export function AddClothingForm({
           </label>
         ))}
       </div>
+
+      <label className="flex flex-col gap-1 text-sm font-medium text-zinc-700 dark:text-zinc-200">
+        Photo
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handlePhotoChange}
+          className="text-sm text-zinc-700 dark:text-zinc-200"
+        />
+      </label>
+
+      {previewUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={previewUrl}
+          alt="Selected clothing item preview"
+          className="h-40 w-40 rounded-lg border border-zinc-200 object-cover dark:border-zinc-800"
+        />
+      )}
 
       <label className="flex items-center gap-2 text-sm font-medium text-zinc-700 dark:text-zinc-200">
         <input
