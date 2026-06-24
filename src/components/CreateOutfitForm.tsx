@@ -1,0 +1,75 @@
+"use client";
+
+import { useState } from "react";
+import type { FormEvent } from "react";
+import type { ClothingItem } from "@/lib/mock-items";
+import type { Outfit } from "@/lib/outfits";
+import { WardrobeGrid } from "@/components/WardrobeGrid";
+
+export function CreateOutfitForm({
+  items,
+  onCreate,
+}: {
+  items: ClothingItem[];
+  onCreate: (outfit: Outfit) => void;
+}) {
+  const [name, setName] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    onCreate({ id: crypto.randomUUID(), name, itemIds: [...selectedIds] });
+    setName("");
+    setSelectedIds(new Set());
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="flex max-h-[80vh] flex-col gap-4 overflow-y-auto rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900"
+    >
+      <label className="flex flex-col gap-1 text-sm font-medium text-zinc-700 dark:text-zinc-200">
+        Outfit name
+        <input
+          type="text"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          required
+          className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-normal text-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+        />
+      </label>
+
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
+          Select items ({selectedIds.size} selected)
+        </p>
+        <WardrobeGrid
+          items={items}
+          selectable
+          selectedIds={selectedIds}
+          onToggleSelect={toggleSelect}
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={selectedIds.size === 0}
+        className="self-start rounded-xl bg-zinc-950 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
+      >
+        Save outfit
+      </button>
+    </form>
+  );
+}

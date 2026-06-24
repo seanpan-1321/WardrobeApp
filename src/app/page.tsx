@@ -3,17 +3,28 @@
 import { useState } from "react";
 import { mockItems } from "@/lib/mock-items";
 import type { ClothingItem } from "@/lib/mock-items";
+import { mockOutfits } from "@/lib/outfits";
+import type { Outfit } from "@/lib/outfits";
 import { WardrobeGrid } from "@/components/WardrobeGrid";
 import { AddClothingForm } from "@/components/AddClothingForm";
+import { CreateOutfitForm } from "@/components/CreateOutfitForm";
+import { OutfitCard } from "@/components/OutfitCard";
 import { Modal } from "@/components/Modal";
 
 export default function Home() {
   const [items, setItems] = useState<ClothingItem[]>(mockItems);
+  const [outfits, setOutfits] = useState<Outfit[]>(mockOutfits);
   const [showForm, setShowForm] = useState(false);
+  const [showOutfitForm, setShowOutfitForm] = useState(false);
 
   function handleAdd(item: ClothingItem) {
     setItems((prev) => [...prev, item]);
     setShowForm(false);
+  }
+
+  function handleCreateOutfit(outfit: Outfit) {
+    setOutfits((prev) => [...prev, outfit]);
+    setShowOutfitForm(false);
   }
 
   return (
@@ -29,13 +40,21 @@ export default function Home() {
           </p>
         </header>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row">
           <button
             type="button"
             onClick={() => setShowForm(true)}
-            className="flex items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-white px-5 py-4 text-base font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+            className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-white px-5 py-4 text-base font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
           >
             + Add clothing item
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowOutfitForm(true)}
+            className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-white px-5 py-4 text-base font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+          >
+            + Create outfit
           </button>
 
           {showForm && (
@@ -43,7 +62,31 @@ export default function Home() {
               <AddClothingForm onAdd={handleAdd} />
             </Modal>
           )}
+
+          {showOutfitForm && (
+            <Modal onClose={() => setShowOutfitForm(false)}>
+              <CreateOutfitForm items={items} onCreate={handleCreateOutfit} />
+            </Modal>
+          )}
         </div>
+
+        <section className="flex flex-col gap-4">
+          <h2 className="text-xl font-semibold text-zinc-950 dark:text-zinc-50">
+            Your outfits
+          </h2>
+
+          {outfits.length === 0 ? (
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              No outfits yet — select items from your wardrobe to create one.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {outfits.map((outfit) => (
+                <OutfitCard key={outfit.id} outfit={outfit} items={items} />
+              ))}
+            </div>
+          )}
+        </section>
 
         <section className="flex flex-col gap-4">
           <h2 className="text-xl font-semibold text-zinc-950 dark:text-zinc-50">

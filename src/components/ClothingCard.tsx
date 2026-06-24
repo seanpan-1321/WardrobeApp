@@ -1,8 +1,37 @@
 import type { ClothingItem } from "@/lib/mock-items";
 
-export function ClothingCard({ item }: { item: ClothingItem }) {
+export function ClothingCard({
+  item,
+  selectable = false,
+  selected = false,
+  onToggleSelect,
+}: {
+  item: ClothingItem;
+  selectable?: boolean;
+  selected?: boolean;
+  onToggleSelect?: () => void;
+}) {
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+    <div
+      onClick={selectable ? onToggleSelect : undefined}
+      className={`flex flex-col gap-2 rounded-xl border bg-white p-4 shadow-sm dark:bg-zinc-900 ${
+        selectable
+          ? "cursor-pointer border-2 " +
+            (selected
+              ? "border-zinc-950 dark:border-zinc-50"
+              : "border-zinc-200 dark:border-zinc-800")
+          : "border border-zinc-200 dark:border-zinc-800"
+      }`}
+    >
+      {selectable && (
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={onToggleSelect}
+          onClick={(event) => event.stopPropagation()}
+          className="h-4 w-4 self-end"
+        />
+      )}
       {item.photoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
