@@ -20,26 +20,37 @@ export default function Home() {
   const [editingOutfit, setEditingOutfit] = useState<Outfit | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
+  const [outfitSearchQuery, setOutfitSearchQuery] = useState("");
 
   const categories = ["All", ...new Set(items.map((item) => item.category))];
+
+  function matchesItemFields(item: ClothingItem, query: string) {
+    return [
+      item.name,
+      item.category,
+      item.clothingType,
+      item.color,
+      item.season,
+      item.style,
+      item.occasion,
+      item.material,
+    ].some((field) => field.toLowerCase().includes(query));
+  }
 
   const filteredItems = items.filter((item) => {
     const matchesCategory =
       categoryFilter === "All" || item.category === categoryFilter;
     const query = searchQuery.trim().toLowerCase();
-    const matchesQuery =
-      query === "" ||
-      [
-        item.name,
-        item.category,
-        item.clothingType,
-        item.color,
-        item.season,
-        item.style,
-        item.occasion,
-        item.material,
-      ].some((field) => field.toLowerCase().includes(query));
+    const matchesQuery = query === "" || matchesItemFields(item, query);
     return matchesCategory && matchesQuery;
+  });
+
+  const filteredOutfits = outfits.filter((outfit) => {
+    const query = outfitSearchQuery.trim().toLowerCase();
+    if (query === "") return true;
+    if (outfit.name.toLowerCase().includes(query)) return true;
+    const outfitItems = items.filter((item) => outfit.itemIds.includes(item.id));
+    return outfitItems.some((item) => matchesItemFields(item, query));
   });
 
   function handleSaveItem(item: ClothingItem) {
@@ -159,13 +170,27 @@ export default function Home() {
             Your outfits
           </h2>
 
+          {outfits.length > 0 && (
+            <input
+              type="text"
+              value={outfitSearchQuery}
+              onChange={(event) => setOutfitSearchQuery(event.target.value)}
+              placeholder="Search your outfits..."
+              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+            />
+          )}
+
           {outfits.length === 0 ? (
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
               No outfits yet — select items from your wardrobe to create one.
             </p>
+          ) : filteredOutfits.length === 0 ? (
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              No outfits match your search.
+            </p>
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {outfits.map((outfit) => (
+              {filteredOutfits.map((outfit) => (
                 <OutfitCard
                   key={outfit.id}
                   outfit={outfit}
