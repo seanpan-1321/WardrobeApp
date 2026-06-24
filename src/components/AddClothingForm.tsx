@@ -29,11 +29,29 @@ const textFields: { name: keyof typeof emptyFormData; label: string }[] = [
 
 export function AddClothingForm({
   onAdd,
+  initialItem,
 }: {
   onAdd: (item: ClothingItem) => void;
+  initialItem?: ClothingItem;
 }) {
-  const [formData, setFormData] = useState(emptyFormData);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [formData, setFormData] = useState(
+    initialItem
+      ? {
+          name: initialItem.name,
+          category: initialItem.category,
+          clothingType: initialItem.clothingType,
+          color: initialItem.color,
+          season: initialItem.season,
+          style: initialItem.style,
+          occasion: initialItem.occasion,
+          material: initialItem.material,
+          favorite: initialItem.favorite,
+        }
+      : emptyFormData,
+  );
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    initialItem?.photoUrl ?? null,
+  );
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const { name, value, type, checked } = event.target;
@@ -51,9 +69,15 @@ export function AddClothingForm({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    onAdd({ id: crypto.randomUUID(), ...formData, photoUrl: previewUrl ?? undefined });
-    setFormData(emptyFormData);
-    setPreviewUrl(null);
+    onAdd({
+      id: initialItem?.id ?? crypto.randomUUID(),
+      ...formData,
+      photoUrl: previewUrl ?? undefined,
+    });
+    if (!initialItem) {
+      setFormData(emptyFormData);
+      setPreviewUrl(null);
+    }
   }
 
   return (
@@ -114,7 +138,7 @@ export function AddClothingForm({
         type="submit"
         className="self-start rounded-xl bg-zinc-950 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
       >
-        Save item
+        {initialItem ? "Save changes" : "Save item"}
       </button>
     </form>
   );

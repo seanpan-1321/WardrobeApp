@@ -9,12 +9,16 @@ import { WardrobeGrid } from "@/components/WardrobeGrid";
 export function CreateOutfitForm({
   items,
   onCreate,
+  initialOutfit,
 }: {
   items: ClothingItem[];
   onCreate: (outfit: Outfit) => void;
+  initialOutfit?: Outfit;
 }) {
-  const [name, setName] = useState("");
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [name, setName] = useState(initialOutfit?.name ?? "");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(
+    new Set(initialOutfit?.itemIds ?? []),
+  );
 
   function toggleSelect(id: string) {
     setSelectedIds((prev) => {
@@ -30,9 +34,15 @@ export function CreateOutfitForm({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    onCreate({ id: crypto.randomUUID(), name, itemIds: [...selectedIds] });
-    setName("");
-    setSelectedIds(new Set());
+    onCreate({
+      id: initialOutfit?.id ?? crypto.randomUUID(),
+      name,
+      itemIds: [...selectedIds],
+    });
+    if (!initialOutfit) {
+      setName("");
+      setSelectedIds(new Set());
+    }
   }
 
   return (
@@ -68,7 +78,7 @@ export function CreateOutfitForm({
         disabled={selectedIds.size === 0}
         className="self-start rounded-xl bg-zinc-950 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
       >
-        Save outfit
+        {initialOutfit ? "Save changes" : "Save outfit"}
       </button>
     </form>
   );

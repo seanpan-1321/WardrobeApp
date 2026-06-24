@@ -4,10 +4,12 @@ import type { Outfit } from "@/lib/outfits";
 export function OutfitCard({
   outfit,
   items,
+  onEdit,
   onDelete,
 }: {
   outfit: Outfit;
   items: ClothingItem[];
+  onEdit?: () => void;
   onDelete?: () => void;
 }) {
   const outfitItems = items.filter((item) => outfit.itemIds.includes(item.id));
@@ -18,16 +20,28 @@ export function OutfitCard({
         <p className="font-semibold text-zinc-950 dark:text-zinc-50">
           {outfit.name}
         </p>
-        {onDelete && (
-          <button
-            type="button"
-            onClick={onDelete}
-            aria-label={`Delete ${outfit.name}`}
-            className="text-xs font-medium text-zinc-400 transition-colors hover:text-red-600 dark:text-zinc-500 dark:hover:text-red-400"
-          >
-            Delete
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {onEdit && (
+            <button
+              type="button"
+              onClick={onEdit}
+              aria-label={`Edit ${outfit.name}`}
+              className="text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-200"
+            >
+              Edit
+            </button>
+          )}
+          {onDelete && (
+            <button
+              type="button"
+              onClick={onDelete}
+              aria-label={`Delete ${outfit.name}`}
+              className="text-xs font-medium text-zinc-400 transition-colors hover:text-red-600 dark:text-zinc-500 dark:hover:text-red-400"
+            >
+              Delete
+            </button>
+          )}
+        </div>
       </div>
       <div className="flex flex-wrap gap-2">
         {outfitItems.map((item) =>

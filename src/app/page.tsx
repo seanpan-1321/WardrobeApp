@@ -16,15 +16,43 @@ export default function Home() {
   const [outfits, setOutfits] = useState<Outfit[]>(mockOutfits);
   const [showForm, setShowForm] = useState(false);
   const [showOutfitForm, setShowOutfitForm] = useState(false);
+  const [editingItem, setEditingItem] = useState<ClothingItem | null>(null);
+  const [editingOutfit, setEditingOutfit] = useState<Outfit | null>(null);
 
-  function handleAdd(item: ClothingItem) {
-    setItems((prev) => [...prev, item]);
+  function handleSaveItem(item: ClothingItem) {
+    setItems((prev) =>
+      prev.some((existing) => existing.id === item.id)
+        ? prev.map((existing) => (existing.id === item.id ? item : existing))
+        : [...prev, item],
+    );
     setShowForm(false);
+    setEditingItem(null);
   }
 
-  function handleCreateOutfit(outfit: Outfit) {
-    setOutfits((prev) => [...prev, outfit]);
+  function handleEdit(id: string) {
+    const item = items.find((existing) => existing.id === id);
+    if (!item) return;
+    setEditingItem(item);
+    setShowForm(true);
+  }
+
+  function handleSaveOutfit(outfit: Outfit) {
+    setOutfits((prev) =>
+      prev.some((existing) => existing.id === outfit.id)
+        ? prev.map((existing) =>
+            existing.id === outfit.id ? outfit : existing,
+          )
+        : [...prev, outfit],
+    );
     setShowOutfitForm(false);
+    setEditingOutfit(null);
+  }
+
+  function handleEditOutfit(id: string) {
+    const outfit = outfits.find((existing) => existing.id === id);
+    if (!outfit) return;
+    setEditingOutfit(outfit);
+    setShowOutfitForm(true);
   }
 
   function handleDelete(id: string) {
@@ -53,7 +81,10 @@ export default function Home() {
         <div className="flex flex-col gap-4 sm:flex-row">
           <button
             type="button"
-            onClick={() => setShowForm(true)}
+            onClick={() => {
+              setEditingItem(null);
+              setShowForm(true);
+            }}
             className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-white px-5 py-4 text-base font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
           >
             + Add clothing item
@@ -61,21 +92,41 @@ export default function Home() {
 
           <button
             type="button"
-            onClick={() => setShowOutfitForm(true)}
+            onClick={() => {
+              setEditingOutfit(null);
+              setShowOutfitForm(true);
+            }}
             className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-white px-5 py-4 text-base font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
           >
             + Create outfit
           </button>
 
           {showForm && (
-            <Modal onClose={() => setShowForm(false)}>
-              <AddClothingForm onAdd={handleAdd} />
+            <Modal
+              onClose={() => {
+                setShowForm(false);
+                setEditingItem(null);
+              }}
+            >
+              <AddClothingForm
+                onAdd={handleSaveItem}
+                initialItem={editingItem ?? undefined}
+              />
             </Modal>
           )}
 
           {showOutfitForm && (
-            <Modal onClose={() => setShowOutfitForm(false)}>
-              <CreateOutfitForm items={items} onCreate={handleCreateOutfit} />
+            <Modal
+              onClose={() => {
+                setShowOutfitForm(false);
+                setEditingOutfit(null);
+              }}
+            >
+              <CreateOutfitForm
+                items={items}
+                onCreate={handleSaveOutfit}
+                initialOutfit={editingOutfit ?? undefined}
+              />
             </Modal>
           )}
         </div>
@@ -96,6 +147,7 @@ export default function Home() {
                   key={outfit.id}
                   outfit={outfit}
                   items={items}
+                  onEdit={() => handleEditOutfit(outfit.id)}
                   onDelete={() => handleDeleteOutfit(outfit.id)}
                 />
               ))}
@@ -108,7 +160,7 @@ export default function Home() {
             Your wardrobe
           </h2>
 
-          <WardrobeGrid items={items} onDelete={handleDelete} />
+          <WardrobeGrid items={items} onEdit={handleEdit} onDelete={handleDelete} />
         </section>
       </main>
     </div>

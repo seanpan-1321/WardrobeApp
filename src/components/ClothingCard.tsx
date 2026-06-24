@@ -5,12 +5,14 @@ export function ClothingCard({
   selectable = false,
   selected = false,
   onToggleSelect,
+  onEdit,
   onDelete,
 }: {
   item: ClothingItem;
   selectable?: boolean;
   selected?: boolean;
   onToggleSelect?: () => void;
+  onEdit?: () => void;
   onDelete?: () => void;
 }) {
   return (
@@ -55,6 +57,16 @@ export function ClothingCard({
             <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900 dark:text-amber-200">
               ★ Favorite
             </span>
+          )}
+          {!selectable && onEdit && (
+            <button
+              type="button"
+              onClick={onEdit}
+              aria-label={`Edit ${item.name}`}
+              className="text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-200"
+            >
+              Edit
+            </button>
           )}
           {!selectable && onDelete && (
             <button

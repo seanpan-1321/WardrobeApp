@@ -6,12 +6,14 @@ export function WardrobeGrid({
   selectable = false,
   selectedIds,
   onToggleSelect,
+  onEdit,
   onDelete,
 }: {
   items: ClothingItem[];
   selectable?: boolean;
   selectedIds?: Set<string>;
   onToggleSelect?: (id: string) => void;
+  onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
 }) {
   return (
@@ -25,6 +27,7 @@ export function WardrobeGrid({
           onToggleSelect={
             onToggleSelect ? () => onToggleSelect(item.id) : undefined
           }
+          onEdit={onEdit ? () => onEdit(item.id) : undefined}
           onDelete={onDelete ? () => onDelete(item.id) : undefined}
         />
       ))}
