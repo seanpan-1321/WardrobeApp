@@ -18,6 +18,29 @@ export default function Home() {
   const [showOutfitForm, setShowOutfitForm] = useState(false);
   const [editingItem, setEditingItem] = useState<ClothingItem | null>(null);
   const [editingOutfit, setEditingOutfit] = useState<Outfit | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("All");
+
+  const categories = ["All", ...new Set(items.map((item) => item.category))];
+
+  const filteredItems = items.filter((item) => {
+    const matchesCategory =
+      categoryFilter === "All" || item.category === categoryFilter;
+    const query = searchQuery.trim().toLowerCase();
+    const matchesQuery =
+      query === "" ||
+      [
+        item.name,
+        item.category,
+        item.clothingType,
+        item.color,
+        item.season,
+        item.style,
+        item.occasion,
+        item.material,
+      ].some((field) => field.toLowerCase().includes(query));
+    return matchesCategory && matchesQuery;
+  });
 
   function handleSaveItem(item: ClothingItem) {
     setItems((prev) =>
@@ -160,7 +183,38 @@ export default function Home() {
             Your wardrobe
           </h2>
 
-          <WardrobeGrid items={items} onEdit={handleEdit} onDelete={handleDelete} />
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search your wardrobe..."
+              className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+            />
+            <select
+              value={categoryFilter}
+              onChange={(event) => setCategoryFilter(event.target.value)}
+              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+            >
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {filteredItems.length === 0 ? (
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              No items match your search.
+            </p>
+          ) : (
+            <WardrobeGrid
+              items={filteredItems}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
         </section>
       </main>
     </div>
