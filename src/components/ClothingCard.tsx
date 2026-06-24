@@ -5,11 +5,13 @@ export function ClothingCard({
   selectable = false,
   selected = false,
   onToggleSelect,
+  onDelete,
 }: {
   item: ClothingItem;
   selectable?: boolean;
   selected?: boolean;
   onToggleSelect?: () => void;
+  onDelete?: () => void;
 }) {
   return (
     <div
@@ -48,11 +50,23 @@ export function ClothingCard({
         <p className="font-semibold text-zinc-950 dark:text-zinc-50">
           {item.name}
         </p>
-        {item.favorite && (
-          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900 dark:text-amber-200">
-            ★ Favorite
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {item.favorite && (
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900 dark:text-amber-200">
+              ★ Favorite
+            </span>
+          )}
+          {!selectable && onDelete && (
+            <button
+              type="button"
+              onClick={onDelete}
+              aria-label={`Delete ${item.name}`}
+              className="text-xs font-medium text-zinc-400 transition-colors hover:text-red-600 dark:text-zinc-500 dark:hover:text-red-400"
+            >
+              Delete
+            </button>
+          )}
+        </div>
       </div>
       <dl className="flex flex-col gap-1 text-sm text-zinc-600 dark:text-zinc-400">
         <div className="flex justify-between gap-2">

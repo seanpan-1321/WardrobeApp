@@ -27,6 +27,16 @@ export default function Home() {
     setShowOutfitForm(false);
   }
 
+  function handleDelete(id: string) {
+    if (!window.confirm("Delete this item from your wardrobe?")) return;
+    setItems((prev) => prev.filter((item) => item.id !== id));
+  }
+
+  function handleDeleteOutfit(id: string) {
+    if (!window.confirm("Delete this outfit?")) return;
+    setOutfits((prev) => prev.filter((outfit) => outfit.id !== id));
+  }
+
   return (
     <div className="flex flex-1 flex-col items-center bg-zinc-50 px-6 py-16 dark:bg-black sm:px-10">
       <main className="flex w-full max-w-4xl flex-col gap-10">
@@ -82,7 +92,12 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {outfits.map((outfit) => (
-                <OutfitCard key={outfit.id} outfit={outfit} items={items} />
+                <OutfitCard
+                  key={outfit.id}
+                  outfit={outfit}
+                  items={items}
+                  onDelete={() => handleDeleteOutfit(outfit.id)}
+                />
               ))}
             </div>
           )}
@@ -93,7 +108,7 @@ export default function Home() {
             Your wardrobe
           </h2>
 
-          <WardrobeGrid items={items} />
+          <WardrobeGrid items={items} onDelete={handleDelete} />
         </section>
       </main>
     </div>
