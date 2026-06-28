@@ -1,30 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { mockItems } from "@/lib/mock-items";
-import type { ClothingItem } from "@/lib/mock-items";
-import { mockOutfits } from "@/lib/outfits";
+import Link from "next/link";
+import { useWardrobe } from "@/lib/wardrobe-context";
 import type { Outfit } from "@/lib/outfits";
-import { WardrobeGrid } from "@/components/WardrobeGrid";
-import { AddClothingForm } from "@/components/AddClothingForm";
-import { CreateOutfitForm } from "@/components/CreateOutfitForm";
 import { OutfitCard } from "@/components/OutfitCard";
+import { CreateOutfitForm } from "@/components/CreateOutfitForm";
 import { Modal } from "@/components/Modal";
 
 export default function Home() {
-  const [items, setItems] = useState<ClothingItem[]>(mockItems);
-  const [outfits, setOutfits] = useState<Outfit[]>(mockOutfits);
-  const [showForm, setShowForm] = useState(false);
-  const [showOutfitForm, setShowOutfitForm] = useState(false);
-  const [editingItem, setEditingItem] = useState<ClothingItem | null>(null);
+  const { items, outfits, loading, saveOutfit, deleteOutfit } = useWardrobe();
   const [editingOutfit, setEditingOutfit] = useState<Outfit | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("All");
-  const [outfitSearchQuery, setOutfitSearchQuery] = useState("");
 
-  const categories = ["All", ...new Set(items.map((item) => item.category))];
-
-  function matchesItemFields(item: ClothingItem, query: string) {
+  function matchesItemFields(itemId: string, query: string) {
+    const item = items.find((existing) => existing.id === itemId);
+    if (!item) return false;
     return [
       item.name,
       item.category,
@@ -37,66 +28,29 @@ export default function Home() {
     ].some((field) => field.toLowerCase().includes(query));
   }
 
-  const filteredItems = items.filter((item) => {
-    const matchesCategory =
-      categoryFilter === "All" || item.category === categoryFilter;
-    const query = searchQuery.trim().toLowerCase();
-    const matchesQuery = query === "" || matchesItemFields(item, query);
-    return matchesCategory && matchesQuery;
-  });
-
   const filteredOutfits = outfits.filter((outfit) => {
-    const query = outfitSearchQuery.trim().toLowerCase();
+    const query = searchQuery.trim().toLowerCase();
     if (query === "") return true;
     if (outfit.name.toLowerCase().includes(query)) return true;
-    const outfitItems = items.filter((item) => outfit.itemIds.includes(item.id));
-    return outfitItems.some((item) => matchesItemFields(item, query));
+    return outfit.itemIds.some((itemId) => matchesItemFields(itemId, query));
   });
 
-  function handleSaveItem(item: ClothingItem) {
-    setItems((prev) =>
-      prev.some((existing) => existing.id === item.id)
-        ? prev.map((existing) => (existing.id === item.id ? item : existing))
-        : [...prev, item],
-    );
-    setShowForm(false);
-    setEditingItem(null);
-  }
-
-  function handleEdit(id: string) {
-    const item = items.find((existing) => existing.id === id);
-    if (!item) return;
-    setEditingItem(item);
-    setShowForm(true);
-  }
-
   function handleSaveOutfit(outfit: Outfit) {
-    setOutfits((prev) =>
-      prev.some((existing) => existing.id === outfit.id)
-        ? prev.map((existing) =>
-            existing.id === outfit.id ? outfit : existing,
-          )
-        : [...prev, outfit],
-    );
-    setShowOutfitForm(false);
+    saveOutfit(outfit);
     setEditingOutfit(null);
-  }
-
-  function handleEditOutfit(id: string) {
-    const outfit = outfits.find((existing) => existing.id === id);
-    if (!outfit) return;
-    setEditingOutfit(outfit);
-    setShowOutfitForm(true);
-  }
-
-  function handleDelete(id: string) {
-    if (!window.confirm("Delete this item from your wardrobe?")) return;
-    setItems((prev) => prev.filter((item) => item.id !== id));
   }
 
   function handleDeleteOutfit(id: string) {
     if (!window.confirm("Delete this outfit?")) return;
-    setOutfits((prev) => prev.filter((outfit) => outfit.id !== id));
+    deleteOutfit(id);
+  }
+
+  if (loading) {
+    return (
+      <div className="flex flex-1 items-center justify-center text-sm text-zinc-500 dark:text-zinc-400">
+        Loading...
+      </div>
+    );
   }
 
   return (
@@ -104,77 +58,36 @@ export default function Home() {
       <main className="flex w-full max-w-4xl flex-col gap-10">
         <header className="flex flex-col gap-2 text-center sm:text-left">
           <h1 className="text-3xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
-            Wardrobe App
+            My Outfits
           </h1>
           <p className="text-zinc-600 dark:text-zinc-400">
-            Upload your clothes, tag them, and build outfits from what you
-            already own.
+            Your saved outfits, built from items in your wardrobe.
           </p>
         </header>
 
-        <div className="flex flex-col gap-4 sm:flex-row">
-          <button
-            type="button"
-            onClick={() => {
-              setEditingItem(null);
-              setShowForm(true);
-            }}
-            className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-white px-5 py-4 text-base font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
-          >
-            + Add clothing item
-          </button>
+        <Link
+          href="/create-outfit"
+          className="flex items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-white px-5 py-4 text-base font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+        >
+          + Create outfit
+        </Link>
 
-          <button
-            type="button"
-            onClick={() => {
-              setEditingOutfit(null);
-              setShowOutfitForm(true);
-            }}
-            className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-white px-5 py-4 text-base font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
-          >
-            + Create outfit
-          </button>
-
-          {showForm && (
-            <Modal
-              onClose={() => {
-                setShowForm(false);
-                setEditingItem(null);
-              }}
-            >
-              <AddClothingForm
-                onAdd={handleSaveItem}
-                initialItem={editingItem ?? undefined}
-              />
-            </Modal>
-          )}
-
-          {showOutfitForm && (
-            <Modal
-              onClose={() => {
-                setShowOutfitForm(false);
-                setEditingOutfit(null);
-              }}
-            >
-              <CreateOutfitForm
-                items={items}
-                onCreate={handleSaveOutfit}
-                initialOutfit={editingOutfit ?? undefined}
-              />
-            </Modal>
-          )}
-        </div>
+        {editingOutfit && (
+          <Modal onClose={() => setEditingOutfit(null)}>
+            <CreateOutfitForm
+              items={items}
+              onCreate={handleSaveOutfit}
+              initialOutfit={editingOutfit}
+            />
+          </Modal>
+        )}
 
         <section className="flex flex-col gap-4">
-          <h2 className="text-xl font-semibold text-zinc-950 dark:text-zinc-50">
-            Your outfits
-          </h2>
-
           {outfits.length > 0 && (
             <input
               type="text"
-              value={outfitSearchQuery}
-              onChange={(event) => setOutfitSearchQuery(event.target.value)}
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Search your outfits..."
               className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
             />
@@ -182,7 +95,11 @@ export default function Home() {
 
           {outfits.length === 0 ? (
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              No outfits yet — select items from your wardrobe to create one.
+              No outfits yet — head to{" "}
+              <Link href="/create-outfit" className="underline">
+                Create Outfit
+              </Link>{" "}
+              to build one from your wardrobe.
             </p>
           ) : filteredOutfits.length === 0 ? (
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
@@ -195,50 +112,11 @@ export default function Home() {
                   key={outfit.id}
                   outfit={outfit}
                   items={items}
-                  onEdit={() => handleEditOutfit(outfit.id)}
+                  onEdit={() => setEditingOutfit(outfit)}
                   onDelete={() => handleDeleteOutfit(outfit.id)}
                 />
               ))}
             </div>
-          )}
-        </section>
-
-        <section className="flex flex-col gap-4">
-          <h2 className="text-xl font-semibold text-zinc-950 dark:text-zinc-50">
-            Your wardrobe
-          </h2>
-
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search your wardrobe..."
-              className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
-            />
-            <select
-              value={categoryFilter}
-              onChange={(event) => setCategoryFilter(event.target.value)}
-              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
-            >
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {filteredItems.length === 0 ? (
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              No items match your search.
-            </p>
-          ) : (
-            <WardrobeGrid
-              items={filteredItems}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
           )}
         </section>
       </main>

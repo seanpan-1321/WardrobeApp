@@ -35,9 +35,12 @@ There is no test runner configured yet.
 
 ## Architecture
 
-- App Router lives in `src/app`. `src/app/layout.tsx` is the root layout (Geist fonts, page metadata). `src/app/page.tsx` is the home page — a Client Component (`"use client"`) that holds the live wardrobe list in `useState`, seeded from `mockItems`, and renders `WardrobeGrid` + the `AddClothingForm` toggle.
-- `src/components/ClothingCard.tsx` and `src/components/WardrobeGrid.tsx` render a single item / the item grid respectively; `src/components/AddClothingForm.tsx` is the controlled form (its own `useState` for form fields) that calls an `onAdd` callback prop with a new `ClothingItem` on submit.
-- `src/lib/mock-items.ts` defines the `ClothingItem` type and the hardcoded `mockItems` array used to seed the UI — this is the type/shape that will eventually map to a Supabase table. `ClothingItem.photoUrl` is optional: the 4 seeded mock items have none and `ClothingCard` falls back to a "No photo" placeholder.
+- App Router lives in `src/app`, now split into multiple routes: `/` (Home — saved outfits view), `/clothes` (My Clothes — wardrobe grid + add/edit), `/create-outfit` (full-page outfit builder). `src/app/layout.tsx` is the root layout (Geist fonts, page metadata) and wraps every route in `WardrobeProvider` + renders `NavBar` above `children`.
+- `src/lib/wardrobe-context.tsx` holds the shared `items`/`outfits` state and CRUD handlers (`saveItem`, `deleteItem`, `saveOutfit`, `deleteOutfit`) behind a `useWardrobe()` hook, seeded from `mockItems`/`mockOutfits`. This is what lets state survive client-side navigation between routes since there's no backend yet.
+- `src/components/NavBar.tsx` is the top nav (Home / My Clothes / Create Outfit), active-route highlighted via `usePathname`.
+- `src/components/ClothingCard.tsx` and `src/components/WardrobeGrid.tsx` render a single item / the item grid respectively; `src/components/AddClothingForm.tsx` is the controlled form (its own `useState` for form fields) that calls an `onAdd` callback prop with a new `ClothingItem` on submit (also reused for editing via an `initialItem` prop).
+- `src/components/CreateOutfitForm.tsx` and `src/components/OutfitCard.tsx` are the outfit equivalents — the form takes `initialOutfit` for editing and is used both full-page (`/create-outfit`) and inside `Modal` (editing from Home).
+- `src/lib/mock-items.ts` defines the `ClothingItem` type and the hardcoded `mockItems` array used to seed the UI — this is the type/shape that will eventually map to a Supabase table. `ClothingItem.photoUrl` is optional: the 4 seeded mock items have none and `ClothingCard` falls back to a "No photo" placeholder. `src/lib/outfits.ts` defines `Outfit` (`id`, `name`, `itemIds`) similarly.
 - Supabase access goes through `src/lib/supabase/`:
   - `client.ts` — `createBrowserClient`, for use in Client Components.
   - `server.ts` — `createServerClient`, for use in Server Components/Route Handlers; reads/writes auth cookies via `next/headers`.
@@ -45,40 +48,31 @@ There is no test runner configured yet.
 - Environment variables: copy `.env.example` to `.env.local` and fill in `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from the Supabase project settings. No Supabase project/schema exists yet — tables for clothing items and outfits still need to be designed and created (e.g. via the Supabase SQL editor or migrations) before the upload/list features can be built.
 - No image storage bucket, auth flow, or data model has been built yet — this scaffold only wires up the Supabase client helpers and Tailwind/Next.js base. The next step per the MVP order above is the clothing item upload feature.
 
-## Current Progress (2026-06-23)
+## Current Progress (2026-06-24)
 
 Completed:
 - Next.js + Tailwind project setup
 - Git repository initialized
 - GitHub repository connected
 - Supabase helper files created
-- Homepage UI created
-- ClothingCard component created
-- WardrobeGrid component created
-- Mock clothing data created
-- ClothingItem TypeScript type expanded with:
-  - category
-  - clothingType
-  - color
-  - season
-  - style
-  - occasion
-  - material
-  - favorite
-- Add Clothing Item form created (`AddClothingForm.tsx`), using React state only — users can add a clothing item from the UI and see it appear in the wardrobe grid immediately
-- Add Clothing Item form turned into a popup/modal (`Modal.tsx`) opened via the "+ Add clothing item" button
-- Photo upload added to the form: a file input lets the user pick an image, previewed immediately via `URL.createObjectURL`; the resulting object URL is stored on the new item as `photoUrl` and rendered on its `ClothingCard`. Items without a photo (including the 4 seeded mock items) show a "No photo" placeholder.
+- ClothingCard, WardrobeGrid, Modal, AddClothingForm components created
+- Mock clothing data created; `ClothingItem` type expanded with category, clothingType, color, season, style, occasion, material, favorite, optional photoUrl
+- Add Clothing Item form (`AddClothingForm.tsx`), opened via modal, with photo upload preview (`URL.createObjectURL`) — items without a photo show a "No photo" placeholder
+- MVP step 4 done: outfit creation (`CreateOutfitForm.tsx`, `OutfitCard.tsx`, `src/lib/outfits.ts`)
+- Edit and delete added for both clothing items and outfits (reusing the same forms via an `initial*` prop, plus `window.confirm` before delete)
+- Search bar + category filter added for the wardrobe grid; search added for outfits (matches outfit name or any item inside it)
+- Multi-page navigation added: state lifted into `WardrobeProvider`/`useWardrobe()` (`src/lib/wardrobe-context.tsx`) so it survives client-side route changes; routes split into `/` (outfits/home), `/clothes` (wardrobe management), `/create-outfit` (outfit builder); `NavBar.tsx` added to root layout
 
 Current Status:
-- UI is working, including adding new items via the modal form, with an optional photo
-- Data is mock/in-memory state only — new items (and their photo object URLs) do not persist across page reloads
+- UI is fully working across all three routes: browse/search/edit/delete outfits on Home, manage clothing items on `/clothes`, build new outfits on `/create-outfit`
+- Data is still mock/in-memory state only (in the context provider) — nothing persists across a full page reload
 - No database integration yet
 - No real image upload/storage yet — photos are local blob URLs in browser memory only, not saved anywhere
 - No authentication yet
 
 Next Planned Milestone:
-- Start MVP step 4: create and save outfits from existing wardrobe items
-- Still React state only — no Supabase, no AI yet
+- Per the Development Priorities below: UI/UX polish on the new multi-page layout, then start Supabase persistence (replace `WardrobeProvider`'s in-memory state with real reads/writes)
+- Still no AI features
 
 Learning Goals:
 - Understand React state
