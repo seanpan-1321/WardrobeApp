@@ -20,7 +20,7 @@ MVP scope, in order:
 - Next.js (App Router, TypeScript, `src/` directory)
 - Tailwind CSS v4 (via `@tailwindcss/postcss`)
 - Supabase (`@supabase/supabase-js` + `@supabase/ssr`) for auth, Postgres data, and image storage
-- Deployed/hosted via GitHub (repo not yet pushed)
+- Deployed/hosted via GitHub (repo pushed to origin/main)
 
 ## Commands
 
@@ -36,44 +36,45 @@ There is no test runner configured yet.
 ## Architecture
 
 - App Router lives in `src/app`, now split into multiple routes: `/` (Home — saved outfits view), `/clothes` (My Clothes — wardrobe grid + add/edit), `/create-outfit` (full-page outfit builder). `src/app/layout.tsx` is the root layout (Geist fonts, page metadata) and wraps every route in `WardrobeProvider` + renders `NavBar` above `children`.
-- `src/lib/wardrobe-context.tsx` holds the shared `items`/`outfits` state and CRUD handlers (`saveItem`, `deleteItem`, `saveOutfit`, `deleteOutfit`) behind a `useWardrobe()` hook, seeded from `mockItems`/`mockOutfits`. This is what lets state survive client-side navigation between routes since there's no backend yet.
+- `src/lib/wardrobe-context.tsx` holds the shared `items`/`outfits` state and CRUD handlers (`saveItem`, `deleteItem`, `saveOutfit`, `deleteOutfit`) behind a `useWardrobe()` hook. On mount it loads data from Supabase (`clothing_items` and `outfits` tables); all writes optimistically update local state and fire async Supabase upserts/deletes. Also manages `user` state and `signOut`. Error logging uses `error.message`/`error.code` for readability.
 - `src/components/NavBar.tsx` is the top nav (Home / My Clothes / Create Outfit), active-route highlighted via `usePathname`.
 - `src/components/ClothingCard.tsx` and `src/components/WardrobeGrid.tsx` render a single item / the item grid respectively; `src/components/AddClothingForm.tsx` is the controlled form (its own `useState` for form fields) that calls an `onAdd` callback prop with a new `ClothingItem` on submit (also reused for editing via an `initialItem` prop).
 - `src/components/CreateOutfitForm.tsx` and `src/components/OutfitCard.tsx` are the outfit equivalents — the form takes `initialOutfit` for editing and is used both full-page (`/create-outfit`) and inside `Modal` (editing from Home).
-- `src/lib/mock-items.ts` defines the `ClothingItem` type and the hardcoded `mockItems` array used to seed the UI — this is the type/shape that will eventually map to a Supabase table. `ClothingItem.photoUrl` is optional: the 4 seeded mock items have none and `ClothingCard` falls back to a "No photo" placeholder. `src/lib/outfits.ts` defines `Outfit` (`id`, `name`, `itemIds`) similarly.
+- `src/lib/mock-items.ts` defines the `ClothingItem` type (`id`, `name`, `category`, `clothingType`, `color`, `season`, `style`, `occasion`, `material`, `favorite`, optional `photoUrl`). The `mockItems` array is no longer used to seed state — data comes from Supabase. `src/lib/outfits.ts` defines `Outfit` (`id`, `name`, `itemIds`) similarly.
 - Supabase access goes through `src/lib/supabase/`:
   - `client.ts` — `createBrowserClient`, for use in Client Components.
   - `server.ts` — `createServerClient`, for use in Server Components/Route Handlers; reads/writes auth cookies via `next/headers`.
   - Always create a fresh client per request/component via these helpers rather than sharing a module-level client instance (this is the pattern `@supabase/ssr` expects for correct cookie handling).
-- Environment variables: copy `.env.example` to `.env.local` and fill in `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from the Supabase project settings. No Supabase project/schema exists yet — tables for clothing items and outfits still need to be designed and created (e.g. via the Supabase SQL editor or migrations) before the upload/list features can be built.
-- No image storage bucket, auth flow, or data model has been built yet — this scaffold only wires up the Supabase client helpers and Tailwind/Next.js base. The next step per the MVP order above is the clothing item upload feature.
+- Environment variables: copy `.env.example` to `.env.local` and fill in `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` from the Supabase project settings.
+- Supabase schema: `public.clothing_items` (id, user_id, name, category, clothing_type, color, season, style, occasion, material, favorite, photo_url, created_at) and `public.outfits` (id, user_id, name, item_ids, created_at). Both have RLS enabled with a `for all` policy scoped to `auth.uid() = user_id`. The `authenticated` role has been granted SELECT/INSERT/UPDATE/DELETE on both tables.
+- Storage: `clothing-photos` bucket (public). Photos uploaded to `user_id/itemId.ext`. One permissive RLS policy (`for all to authenticated with check (true)`). Public URL stored in `photo_url` column.
 
-## Current Progress (2026-06-24)
+## Current Progress (2026-06-28)
 
 Completed:
 - Next.js + Tailwind project setup
-- Git repository initialized
-- GitHub repository connected
-- Supabase helper files created
+- Git repository initialized and pushed to GitHub (origin/main)
+- Supabase project connected; client helpers created (`src/lib/supabase/client.ts`, `server.ts`)
 - ClothingCard, WardrobeGrid, Modal, AddClothingForm components created
-- Mock clothing data created; `ClothingItem` type expanded with category, clothingType, color, season, style, occasion, material, favorite, optional photoUrl
-- Add Clothing Item form (`AddClothingForm.tsx`), opened via modal, with photo upload preview (`URL.createObjectURL`) — items without a photo show a "No photo" placeholder
-- MVP step 4 done: outfit creation (`CreateOutfitForm.tsx`, `OutfitCard.tsx`, `src/lib/outfits.ts`)
-- Edit and delete added for both clothing items and outfits (reusing the same forms via an `initial*` prop, plus `window.confirm` before delete)
-- Search bar + category filter added for the wardrobe grid; search added for outfits (matches outfit name or any item inside it)
-- Multi-page navigation added: state lifted into `WardrobeProvider`/`useWardrobe()` (`src/lib/wardrobe-context.tsx`) so it survives client-side route changes; routes split into `/` (outfits/home), `/clothes` (wardrobe management), `/create-outfit` (outfit builder); `NavBar.tsx` added to root layout
+- `ClothingItem` type with category, clothingType, color, season, style, occasion, material, favorite, optional photoUrl
+- Add Clothing Item form with photo preview (`URL.createObjectURL`); "No photo" placeholder fallback
+- MVP step 4: outfit creation (`CreateOutfitForm.tsx`, `OutfitCard.tsx`, `src/lib/outfits.ts`)
+- Edit and delete for both clothing items and outfits
+- Search bar + category filter for wardrobe grid; search for outfits
+- Multi-page navigation: `/` (outfits), `/clothes` (wardrobe), `/create-outfit`; state in `WardrobeProvider`
+- Supabase authentication live (email/password); user shown in NavBar with Sign Out
+- Supabase persistence: `clothing_items` and `outfits` tables created with RLS; `WardrobeProvider` loads/saves real data
+- Photo upload to Supabase Storage (`clothing-photos` bucket); public URL stored in `photo_url` column
+- Fixed React duplicate key warning in `ClothingCard` tag list
 
 Current Status:
-- UI is fully working across all three routes: browse/search/edit/delete outfits on Home, manage clothing items on `/clothes`, build new outfits on `/create-outfit`
-- Supabase auth is live — users sign in and data is scoped per user
-- Clothing items and outfits persist to Supabase (`clothing_items` and `outfits` tables) and load on refresh
-- Photo upload works — photos are stored in the `clothing-photos` Supabase Storage bucket (public bucket, MVP decision) and the public URL is saved in `photo_url` column
-- Storage RLS: one permissive policy (`for all to authenticated with check (true)`) — tighten post-MVP
-- Error logging in `wardrobe-context.tsx` now uses `error.message` / `error.code` for readable output
+- All three routes fully working: Home (outfits), My Clothes (wardrobe grid + add/edit/delete), Create Outfit
+- Data persists across page reloads — stored in Supabase, scoped per authenticated user
+- Photos upload to Supabase Storage and display correctly
+- No mock/in-memory data — everything reads from and writes to Supabase
 
 Next Planned Milestone:
-- Clean up test data (dummy items added during debugging)
-- Verify outfits also persist correctly end-to-end
+- Verify outfits persist end-to-end (create outfit → refresh → still there)
 - UI/UX polish
 - Still no AI features
 
@@ -158,12 +159,12 @@ Camera integration is a lower priority than outfit management and wardrobe organ
 
 Current priority order:
 
-1. Improve wardrobe management
-2. Improve outfit creation workflow
-3. Add multi-page navigation
+1. ~~Improve wardrobe management~~ ✓
+2. ~~Improve outfit creation workflow~~ ✓
+3. ~~Add multi-page navigation~~ ✓
 4. Improve UI/UX
-5. Integrate Supabase persistence
-6. Implement image storage
+5. ~~Integrate Supabase persistence~~ ✓
+6. ~~Implement image storage~~ ✓
 7. Add AI-assisted clothing classification
 8. Add AI outfit recommendation features
 
