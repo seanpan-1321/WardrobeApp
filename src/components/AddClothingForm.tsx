@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import type { ClothingItem } from "@/lib/mock-items";
+import { createClient } from "@/lib/supabase/client";
 
 const emptyFormData = {
   name: "",
@@ -49,9 +50,12 @@ export function AddClothingForm({
         }
       : emptyFormData,
   );
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(
     initialItem?.photoUrl ?? null,
   );
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const { name, value, type, checked } = event.target;
@@ -63,19 +67,46 @@ export function AddClothingForm({
 
   function handlePhotoChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    if (previewUrl && !initialItem?.photoUrl) URL.revokeObjectURL(previewUrl);
+    setPhotoFile(file);
     setPreviewUrl(file ? URL.createObjectURL(file) : null);
+    setUploadError(null);
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    onAdd({
-      id: initialItem?.id ?? crypto.randomUUID(),
-      ...formData,
-      photoUrl: previewUrl ?? undefined,
-    });
+    setUploadError(null);
+
+    const itemId = initialItem?.id ?? crypto.randomUUID();
+    let photoUrl = initialItem?.photoUrl;
+
+    if (photoFile) {
+      setUploading(true);
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      const ext = photoFile.name.split(".").pop();
+      const path = `${user!.id}/${itemId}.${ext}`;
+      const { error } = await supabase.storage
+        .from("clothing-photos")
+        .upload(path, photoFile, { upsert: true });
+
+      if (error) {
+        setUploadError("Photo upload failed. Item saved without photo.");
+        console.error("Upload error:", error);
+      } else {
+        const { data } = supabase.storage
+          .from("clothing-photos")
+          .getPublicUrl(path);
+        photoUrl = data.publicUrl;
+      }
+      setUploading(false);
+    }
+
+    onAdd({ id: itemId, ...formData, photoUrl });
+
     if (!initialItem) {
       setFormData(emptyFormData);
+      setPhotoFile(null);
       setPreviewUrl(null);
     }
   }
@@ -134,11 +165,16 @@ export function AddClothingForm({
         Favorite
       </label>
 
+      {uploadError && (
+        <p className="text-sm text-red-600 dark:text-red-400">{uploadError}</p>
+      )}
+
       <button
         type="submit"
-        className="self-start rounded-xl bg-zinc-950 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
+        disabled={uploading}
+        className="self-start rounded-xl bg-zinc-950 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
       >
-        {initialItem ? "Save changes" : "Save item"}
+        {uploading ? "Uploading photo..." : initialItem ? "Save changes" : "Save item"}
       </button>
     </form>
   );

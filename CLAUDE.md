@@ -65,13 +65,16 @@ Completed:
 
 Current Status:
 - UI is fully working across all three routes: browse/search/edit/delete outfits on Home, manage clothing items on `/clothes`, build new outfits on `/create-outfit`
-- Data is still mock/in-memory state only (in the context provider) — nothing persists across a full page reload
-- No database integration yet
-- No real image upload/storage yet — photos are local blob URLs in browser memory only, not saved anywhere
-- No authentication yet
+- Supabase auth is live — users sign in and data is scoped per user
+- Clothing items and outfits persist to Supabase (`clothing_items` and `outfits` tables) and load on refresh
+- Photo upload works — photos are stored in the `clothing-photos` Supabase Storage bucket (public bucket, MVP decision) and the public URL is saved in `photo_url` column
+- Storage RLS: one permissive policy (`for all to authenticated with check (true)`) — tighten post-MVP
+- Error logging in `wardrobe-context.tsx` now uses `error.message` / `error.code` for readable output
 
 Next Planned Milestone:
-- Per the Development Priorities below: UI/UX polish on the new multi-page layout, then start Supabase persistence (replace `WardrobeProvider`'s in-memory state with real reads/writes)
+- Clean up test data (dummy items added during debugging)
+- Verify outfits also persist correctly end-to-end
+- UI/UX polish
 - Still no AI features
 
 Learning Goals:
@@ -167,3 +170,9 @@ Current priority order:
 Development rule:
 
 Do not implement advanced AI features until the non-AI wardrobe and outfit management experience is functional and enjoyable to use.
+
+### Image Storage: MVP Decision
+
+The `clothing-photos` Supabase Storage bucket is set to **public** for MVP simplicity. Photos are uploaded to `user_id/itemId.ext` and stored as a `getPublicUrl` result in the database. This means photo URLs are technically accessible without authentication.
+
+**Future improvement:** Switch to a private bucket with authenticated reads. This requires storing the storage path (not the URL) in the database and calling `createSignedUrl` at display time to generate time-limited URLs. Deferred until after core features are stable.

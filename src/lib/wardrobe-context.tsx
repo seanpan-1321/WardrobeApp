@@ -49,8 +49,8 @@ function toItemRow(item: ClothingItem, userId: string) {
     occasion: item.occasion,
     material: item.material,
     favorite: item.favorite,
+    photo_url: item.photoUrl ?? null,
     user_id: userId,
-    // photoUrl is an ephemeral blob URL; skip until image storage is added
   };
 }
 
@@ -109,8 +109,8 @@ export function WardrobeProvider({ children }: { children: ReactNode }) {
         supabase.from("clothing_items").select("*").order("created_at"),
         supabase.from("outfits").select("*").order("created_at"),
       ]);
-      if (itemsError) console.error("Failed to load items:", itemsError);
-      if (outfitsError) console.error("Failed to load outfits:", outfitsError);
+      if (itemsError) console.error("Failed to load items:", itemsError.message, itemsError.code);
+      if (outfitsError) console.error("Failed to load outfits:", outfitsError.message, outfitsError.code);
       setItems((itemRows ?? []).map(toClothingItem));
       setOutfits((outfitRows ?? []).map(toOutfit));
       setLoading(false);
@@ -130,7 +130,7 @@ export function WardrobeProvider({ children }: { children: ReactNode }) {
       .from("clothing_items")
       .upsert(toItemRow(item, user.id))
       .then(({ error }) => {
-        if (error) console.error("Failed to save item:", error);
+        if (error) console.error("Failed to save item:", error.message, error.code);
       });
   }
 
@@ -141,7 +141,7 @@ export function WardrobeProvider({ children }: { children: ReactNode }) {
       .delete()
       .eq("id", id)
       .then(({ error }) => {
-        if (error) console.error("Failed to delete item:", error);
+        if (error) console.error("Failed to delete item:", error.message, error.code);
       });
   }
 
@@ -156,7 +156,7 @@ export function WardrobeProvider({ children }: { children: ReactNode }) {
       .from("outfits")
       .upsert(toOutfitRow(outfit, user.id))
       .then(({ error }) => {
-        if (error) console.error("Failed to save outfit:", error);
+        if (error) console.error("Failed to save outfit:", error.message, error.code);
       });
   }
 
@@ -167,7 +167,7 @@ export function WardrobeProvider({ children }: { children: ReactNode }) {
       .delete()
       .eq("id", id)
       .then(({ error }) => {
-        if (error) console.error("Failed to delete outfit:", error);
+        if (error) console.error("Failed to delete outfit:", error.message, error.code);
       });
   }
 

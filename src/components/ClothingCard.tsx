@@ -81,10 +81,10 @@ export function ClothingCard({
         </div>
       </div>
       <div className="flex flex-wrap gap-1.5">
-        {[item.clothingType, item.color, item.season, item.style].map((tag) =>
+        {[item.clothingType, item.color, item.season, item.style].map((tag, i) =>
           tag ? (
             <span
-              key={tag}
+              key={i}
               className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
             >
               {tag}
