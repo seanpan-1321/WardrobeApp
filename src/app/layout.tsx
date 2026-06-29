@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   description: "Upload your clothes and build outfits from what you own.",
 };
 
+const themeScript = `(function(){var t=localStorage.getItem('theme');var d=window.matchMedia('(prefers-color-scheme:dark)').matches;if(t==='dark'||(t===null&&d)){document.documentElement.classList.add('dark')}})()`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,8 +30,10 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <WardrobeProvider>
           <NavBar />
           {children}

@@ -43,7 +43,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center bg-zinc-50 px-6 dark:bg-black">
+    <div className="flex flex-1 flex-col items-center justify-center bg-page-bg px-6">
       <div className="flex w-full max-w-sm flex-col gap-6">
         <div className="flex flex-col gap-1 text-center">
           <h1 className="text-2xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
@@ -63,7 +63,7 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
-              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-normal text-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+              className="rounded-lg border border-warm-border bg-surface px-3 py-2 text-sm font-normal text-zinc-950 dark:text-zinc-50"
             />
           </label>
 
@@ -75,7 +75,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete={mode === "signin" ? "current-password" : "new-password"}
-              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-normal text-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+              className="rounded-lg border border-warm-border bg-surface px-3 py-2 text-sm font-normal text-zinc-950 dark:text-zinc-50"
             />
           </label>
 

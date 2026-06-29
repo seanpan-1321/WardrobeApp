@@ -15,7 +15,7 @@ export function Modal({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-lg rounded-xl bg-white p-6 dark:bg-zinc-900"
+        className="relative w-full max-w-lg rounded-xl bg-surface p-6"
         onClick={(event) => event.stopPropagation()}
       >
         <button

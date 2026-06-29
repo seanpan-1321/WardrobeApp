@@ -64,7 +64,7 @@ export default function ClothesPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col items-center bg-zinc-50 px-6 py-16 dark:bg-black sm:px-10">
+    <div className="flex flex-1 flex-col items-center bg-page-bg px-6 py-16 sm:px-10">
       <main className="flex w-full max-w-4xl flex-col gap-10">
         <header className="flex flex-col gap-2 text-center sm:text-left">
           <h1 className="text-3xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
@@ -81,7 +81,7 @@ export default function ClothesPage() {
             setEditingItem(null);
             setShowForm(true);
           }}
-          className="flex items-center justify-center rounded-xl border border-dashed border-zinc-300 bg-white px-5 py-4 text-base font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+          className="flex items-center justify-center rounded-xl border border-dashed border-warm-border bg-surface px-5 py-4 text-base font-medium text-zinc-700 transition-colors hover:bg-surface-hover dark:text-zinc-200"
         >
           + Add clothing item
         </button>
@@ -107,12 +107,12 @@ export default function ClothesPage() {
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Search your wardrobe..."
-              className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+              className="flex-1 rounded-lg border border-warm-border bg-surface px-3 py-2 text-sm text-zinc-950 dark:text-zinc-50"
             />
             <select
               value={categoryFilter}
               onChange={(event) => setCategoryFilter(event.target.value)}
-              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+              className="rounded-lg border border-warm-border bg-surface px-3 py-2 text-sm text-zinc-950 dark:text-zinc-50"
             >
               {categories.map((category) => (
                 <option key={category} value={category}>

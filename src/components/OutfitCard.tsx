@@ -15,7 +15,7 @@ export function OutfitCard({
   const outfitItems = items.filter((item) => outfit.itemIds.includes(item.id));
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="flex flex-col gap-3 rounded-xl border border-warm-border bg-surface p-4 shadow-sm">
       <div className="flex items-center justify-between gap-2">
         <p className="font-semibold text-zinc-950 dark:text-zinc-50">
           {outfit.name}
@@ -58,7 +58,7 @@ export function OutfitCard({
             <div
               key={item.id}
               title={item.name}
-              className="flex h-16 w-16 items-center justify-center rounded-lg bg-zinc-100 text-center text-[10px] text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500"
+              className="flex h-16 w-16 items-center justify-center rounded-lg bg-surface-hover text-center text-[10px] text-zinc-400 dark:text-zinc-500"
             >
               {item.name}
             </div>

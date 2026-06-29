@@ -18,13 +18,13 @@ export function ClothingCard({
   return (
     <div
       onClick={selectable ? onToggleSelect : undefined}
-      className={`flex flex-col gap-2 rounded-xl border bg-white p-4 shadow-sm dark:bg-zinc-900 ${
+      className={`flex flex-col gap-2 rounded-xl border bg-surface p-4 shadow-sm ${
         selectable
           ? "cursor-pointer border-2 " +
             (selected
               ? "border-zinc-950 dark:border-zinc-50"
-              : "border-zinc-200 dark:border-zinc-800")
-          : "border border-zinc-200 dark:border-zinc-800"
+              : "border-warm-border")
+          : "border border-warm-border"
       }`}
     >
       {selectable && (
@@ -44,7 +44,7 @@ export function ClothingCard({
           className="h-40 w-full rounded-lg object-cover"
         />
       ) : (
-        <div className="flex h-40 w-full items-center justify-center rounded-lg bg-zinc-100 text-sm text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500">
+        <div className="flex h-40 w-full items-center justify-center rounded-lg bg-surface-hover text-sm text-zinc-400 dark:text-zinc-500">
           No photo
         </div>
       )}
@@ -85,7 +85,7 @@ export function ClothingCard({
           tag ? (
             <span
               key={i}
-              className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+              className="rounded-full bg-surface-hover px-2 py-0.5 text-xs text-zinc-600 dark:text-zinc-400"
             >
               {tag}
             </span>

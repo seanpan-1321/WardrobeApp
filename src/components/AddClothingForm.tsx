@@ -136,7 +136,7 @@ export function AddClothingForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900"
+      className="flex flex-col gap-4 rounded-xl border border-warm-border bg-surface p-5"
     >
       <h2 className="text-base font-semibold text-zinc-950 dark:text-zinc-50">
         {initialItem ? `Edit "${initialItem.name}"` : "Add clothing item"}
@@ -151,7 +151,7 @@ export function AddClothingForm({
           onChange={handleChange}
           required
           placeholder="e.g. Black Linen Shirt"
-          className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-normal text-zinc-950 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600"
+          className="rounded-lg border border-warm-border bg-surface px-3 py-2 text-sm font-normal text-zinc-950 placeholder:text-zinc-400 dark:text-zinc-50 dark:placeholder:text-zinc-600"
         />
       </label>
 
@@ -166,7 +166,7 @@ export function AddClothingForm({
               name={field.name}
               value={formData[field.name as keyof typeof formData] as string}
               onChange={handleSelectChange}
-              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-normal text-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
+              className="rounded-lg border border-warm-border bg-surface px-3 py-2 text-sm font-normal text-zinc-950 dark:text-zinc-50"
             >
               <option value="">— Select —</option>
               {field.options.map((opt) => (
@@ -194,7 +194,7 @@ export function AddClothingForm({
         <img
           src={previewUrl}
           alt="Selected clothing item preview"
-          className="h-40 w-40 rounded-lg border border-zinc-200 object-cover dark:border-zinc-800"
+          className="h-40 w-40 rounded-lg border border-warm-border object-cover"
         />
       )}
 

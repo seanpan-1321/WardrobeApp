@@ -49,16 +49,26 @@ There is no test runner configured yet.
 - Supabase schema: `public.clothing_items` (id, user_id, name, category, clothing_type, color, season, style, occasion, material, favorite, photo_url, created_at) and `public.outfits` (id, user_id, name, item_ids, created_at). Both have RLS enabled with a `for all` policy scoped to `auth.uid() = user_id`. The `authenticated` role has been granted SELECT/INSERT/UPDATE/DELETE on both tables.
 - Storage: `clothing-photos` bucket (public). Photos uploaded to `user_id/itemId.ext`. One permissive RLS policy (`for all to authenticated with check (true)`). Public URL stored in `photo_url` column.
 
-## Current Progress (2026-06-28)
+## Current Progress (2026-06-29)
 
-Completed:
+### Core MVP — Complete ✓
+
+All five MVP goals are shipped:
+
+1. ✓ Upload a clothing item (photo + metadata)
+2. ✓ Add category, color, season, and style to an item
+3. ✓ View all clothing items
+4. ✓ Create and save outfits from existing items
+5. ✓ Simple, clean UI
+
+Full feature list:
 - Next.js + Tailwind project setup
 - Git repository initialized and pushed to GitHub (origin/main)
 - Supabase project connected; client helpers created (`src/lib/supabase/client.ts`, `server.ts`)
 - ClothingCard, WardrobeGrid, Modal, AddClothingForm components created
 - `ClothingItem` type with category, clothingType, color, season, style, occasion, material, favorite, optional photoUrl
 - Add Clothing Item form with photo preview (`URL.createObjectURL`); "No photo" placeholder fallback
-- MVP step 4: outfit creation (`CreateOutfitForm.tsx`, `OutfitCard.tsx`, `src/lib/outfits.ts`)
+- Outfit creation (`CreateOutfitForm.tsx`, `OutfitCard.tsx`, `src/lib/outfits.ts`)
 - Edit and delete for both clothing items and outfits
 - Search bar + category filter for wardrobe grid; search for outfits
 - Multi-page navigation: `/` (outfits), `/clothes` (wardrobe), `/create-outfit`; state in `WardrobeProvider`
@@ -66,6 +76,7 @@ Completed:
 - Supabase persistence: `clothing_items` and `outfits` tables created with RLS; `WardrobeProvider` loads/saves real data
 - Photo upload to Supabase Storage (`clothing-photos` bucket); public URL stored in `photo_url` column
 - Fixed React duplicate key warning in `ClothingCard` tag list
+- UI/UX polish: form fields converted to dropdowns (category, type, color, season, style, occasion, material); non-name fields made optional; modal titles added; empty state bug fixed on My Clothes page
 
 Current Status:
 - All three routes fully working: Home (outfits), My Clothes (wardrobe grid + add/edit/delete), Create Outfit
@@ -73,10 +84,15 @@ Current Status:
 - Photos upload to Supabase Storage and display correctly
 - No mock/in-memory data — everything reads from and writes to Supabase
 
-Next Planned Milestone:
-- Verify outfits persist end-to-end (create outfit → refresh → still there)
-- UI/UX polish
-- Still no AI features
+### Next Phase — Polish & Enhancement
+
+The project is now transitioning from MVP completion to iterative improvement. AI features remain out of scope until the core experience feels polished and enjoyable.
+
+Next priorities (in order):
+1. Continued UI/UX polish (richer outfit cards, loading states, mobile layout)
+2. Quality-of-life features (favorite filter, outfit item count, better empty states)
+3. AI-assisted clothing classification (future)
+4. AI outfit recommendations (future)
 
 Learning Goals:
 - Understand React state
@@ -97,7 +113,7 @@ Long-term, the app should feel like a digital wardrobe rather than a clothing da
 
 Minimize manual user input whenever possible.
 
-Current forms require users to enter many clothing attributes manually (color, style, material, season, occasion, etc.). This creates friction and makes adding clothes tedious.
+Structured fields (category, color, season, style, occasion, material) are now dropdowns with curated options — only the item name requires free-text input. Further friction reduction (e.g. auto-detection from photos) is a future AI feature.
 
 Future versions should prioritize:
 
@@ -162,7 +178,7 @@ Current priority order:
 1. ~~Improve wardrobe management~~ ✓
 2. ~~Improve outfit creation workflow~~ ✓
 3. ~~Add multi-page navigation~~ ✓
-4. Improve UI/UX
+4. Improve UI/UX ← current focus
 5. ~~Integrate Supabase persistence~~ ✓
 6. ~~Implement image storage~~ ✓
 7. Add AI-assisted clothing classification

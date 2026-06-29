@@ -23,7 +23,7 @@ export default function CreateOutfitPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col items-center bg-zinc-50 px-6 py-16 dark:bg-black sm:px-10">
+    <div className="flex flex-1 flex-col items-center bg-page-bg px-6 py-16 sm:px-10">
       <main className="flex w-full max-w-4xl flex-col gap-10">
         <header className="flex flex-col gap-2 text-center sm:text-left">
           <h1 className="text-3xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
