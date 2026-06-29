@@ -122,7 +122,11 @@ export default function ClothesPage() {
             </select>
           </div>
 
-          {filteredItems.length === 0 ? (
+          {items.length === 0 ? (
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              No clothes yet — click <strong>+ Add clothing item</strong> above to get started.
+            </p>
+          ) : filteredItems.length === 0 ? (
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
               No items match your search.
             </p>

@@ -5,6 +5,34 @@ import type { ChangeEvent, FormEvent } from "react";
 import type { ClothingItem } from "@/lib/mock-items";
 import { createClient } from "@/lib/supabase/client";
 
+const CATEGORIES = ["Tops", "Bottoms", "Outerwear", "Shoes", "Accessories", "Bags", "Other"];
+const CLOTHING_TYPES = [
+  "T-Shirt", "Shirt", "Blouse", "Sweater", "Hoodie",
+  "Jacket", "Coat", "Pants", "Jeans", "Shorts",
+  "Skirt", "Dress", "Sneakers", "Boots", "Sandals",
+  "Loafers", "Bag", "Backpack", "Belt", "Hat",
+  "Scarf", "Sunglasses", "Watch", "Other",
+];
+const COLORS = [
+  "Black", "White", "Gray", "Navy", "Brown",
+  "Beige", "Red", "Blue", "Green", "Yellow",
+  "Pink", "Purple", "Orange", "Multicolor",
+];
+const SEASONS = ["All Season", "Spring/Summer", "Fall/Winter"];
+const STYLES = ["Casual", "Formal", "Smart Casual", "Athletic", "Streetwear"];
+const OCCASIONS = ["Everyday", "Work", "Evening", "Weekend", "Special Event"];
+const MATERIALS = ["Cotton", "Polyester", "Wool", "Silk", "Linen", "Denim", "Leather", "Synthetic"];
+
+const selectFields: { name: string; label: string; options: string[] }[] = [
+  { name: "category", label: "Category", options: CATEGORIES },
+  { name: "clothingType", label: "Clothing Type", options: CLOTHING_TYPES },
+  { name: "color", label: "Color", options: COLORS },
+  { name: "season", label: "Season", options: SEASONS },
+  { name: "style", label: "Style", options: STYLES },
+  { name: "occasion", label: "Occasion", options: OCCASIONS },
+  { name: "material", label: "Material", options: MATERIALS },
+];
+
 const emptyFormData = {
   name: "",
   category: "",
@@ -16,17 +44,6 @@ const emptyFormData = {
   material: "",
   favorite: false,
 };
-
-const textFields: { name: keyof typeof emptyFormData; label: string }[] = [
-  { name: "name", label: "Name" },
-  { name: "category", label: "Category" },
-  { name: "clothingType", label: "Clothing Type" },
-  { name: "color", label: "Color" },
-  { name: "season", label: "Season" },
-  { name: "style", label: "Style" },
-  { name: "occasion", label: "Occasion" },
-  { name: "material", label: "Material" },
-];
 
 export function AddClothingForm({
   onAdd,
@@ -63,6 +80,11 @@ export function AddClothingForm({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+  }
+
+  function handleSelectChange(event: ChangeEvent<HTMLSelectElement>) {
+    const { name, value } = event.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   }
 
   function handlePhotoChange(event: ChangeEvent<HTMLInputElement>) {
@@ -116,21 +138,43 @@ export function AddClothingForm({
       onSubmit={handleSubmit}
       className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900"
     >
+      <h2 className="text-base font-semibold text-zinc-950 dark:text-zinc-50">
+        {initialItem ? `Edit "${initialItem.name}"` : "Add clothing item"}
+      </h2>
+
+      <label className="flex flex-col gap-1 text-sm font-medium text-zinc-700 dark:text-zinc-200">
+        Name <span className="text-red-500">*</span>
+        <input
+          type="text"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+          required
+          placeholder="e.g. Black Linen Shirt"
+          className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-normal text-zinc-950 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50 dark:placeholder:text-zinc-600"
+        />
+      </label>
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {textFields.map((field) => (
+        {selectFields.map((field) => (
           <label
             key={field.name}
             className="flex flex-col gap-1 text-sm font-medium text-zinc-700 dark:text-zinc-200"
           >
             {field.label}
-            <input
-              type="text"
+            <select
               name={field.name}
-              value={formData[field.name] as string}
-              onChange={handleChange}
-              required
+              value={formData[field.name as keyof typeof formData] as string}
+              onChange={handleSelectChange}
               className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-normal text-zinc-950 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-50"
-            />
+            >
+              <option value="">— Select —</option>
+              {field.options.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
           </label>
         ))}
       </div>
